@@ -3,3 +3,5 @@ Objects
 Debug
 *.pdf
 .history
+/workspace/.metadata/*.lock
+/workspace/.metadata/*.log
