@@ -5,3 +5,4 @@ Debug
 .history
 /workspace/.metadata/*.lock
 /workspace/.metadata/*.log
+/local-links.txt
