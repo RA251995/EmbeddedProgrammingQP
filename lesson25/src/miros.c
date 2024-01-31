@@ -92,7 +92,7 @@ void OS_sched(void)
             {
                 OS_currIdx = 1U;
             }
-        } while ((OS_readySet & (1U << (OS_threadNum - 1U))) != 0U);
+        } while ((OS_readySet & (1U << (OS_currIdx - 1U))) == 0U);
     }
     OS_next = OS_thread[OS_currIdx];
 
