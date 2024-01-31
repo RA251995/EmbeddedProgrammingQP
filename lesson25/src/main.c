@@ -14,10 +14,10 @@ void main_blinky1(void)
 {
     while (1)
     {
-        BSP_ledOrangeOn();
-//        BSP_delay(BSP_TICKS_PER_SEC / 4U);
-        BSP_ledOrangeOff();
-//        BSP_delay(BSP_TICKS_PER_SEC * 3U / 4U);
+        BSP_ledGreenOn();
+        OS_delay(BSP_TICKS_PER_SEC / 4U);
+        BSP_ledGreenOff();
+        OS_delay(BSP_TICKS_PER_SEC * 3U / 4U);
     }
 }
 
@@ -27,10 +27,10 @@ void main_blinky2(void)
 {
     while (1)
     {
-        BSP_ledYellowOn();
-//        BSP_delay(BSP_TICKS_PER_SEC / 2U);
-        BSP_ledYellowOff();
-//        BSP_delay(BSP_TICKS_PER_SEC / 3U);
+        BSP_ledOrangeOn();
+        OS_delay(BSP_TICKS_PER_SEC / 2U);
+        BSP_ledOrangeOff();
+        OS_delay(BSP_TICKS_PER_SEC / 3U);
     }
 }
 
@@ -40,17 +40,19 @@ void main_blinky3(void)
 {
     while (1)
     {
-        BSP_ledGreenOn();
-//        BSP_delay(BSP_TICKS_PER_SEC / 3U);
-        BSP_ledGreenOff();
-//        BSP_delay(BSP_TICKS_PER_SEC * 3U / 5U);
+        BSP_ledYellowOn();
+        OS_delay(BSP_TICKS_PER_SEC / 3U);
+        BSP_ledYellowOff();
+        OS_delay(BSP_TICKS_PER_SEC * 3U / 5U);
     }
 }
+
+uint32_t stackIdleThread[40] __attribute__((aligned(8)));
 
 int32_t main(void)
 {
     BSP_init();
-    OS_init();
+    OS_init(stackIdleThread, sizeof(stackIdleThread));
 
     OSThread_start(&blinky1, &main_blinky1, &stack_blinky1, sizeof(stack_blinky1));
     OSThread_start(&blinky2, &main_blinky2, &stack_blinky2, sizeof(stack_blinky2));
