@@ -337,7 +337,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls>-Wconditional-uninitialized -Wsometimes-uninitialized</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
               <IncludePath>..\qpn\include;..\ucos2\Source;..\ucos2\Ports\ARM-Cortex-M\ARMv7-M\ARM;.</IncludePath>
