@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="6.1.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+ <!--${qpc}-->
+ <framework name="qpc"/>
+ <!--${Shared}-->
+ <package name="Shared" stereotype="0x00">
+  <!--${Shared::BlinkySignals}-->
+  <attribute name="BlinkySignals" type="enum" visibility="0x04" properties="0x00">
+   <code>{
+    TIMEOUT_SIG = Q_USER_SIG,
+};</code>
+  </attribute>
+  <!--${Shared::AO_Blinky}-->
+  <attribute name="AO_Blinky" type="QActive * const" visibility="0x00" properties="0x00">
+   <code>= &amp;Blinky_inst.super;</code>
+  </attribute>
+  <!--${Shared::Blinky_ctor}-->
+  <operation name="Blinky_ctor" type="void" visibility="0x00" properties="0x01">
+   <documentation>The Blinky &quot;constructor&quot; is provided outside of the Blinky class, so that it can be used independently from the class. This is part of the &quot;opaque pointer&quot; design idiom.</documentation>
+   <code>Blinky * const me = &amp;Blinky_inst;
+QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Blinky_initial));
+QTimeEvt_ctorX(&amp;me-&gt;timeEvt, &amp;me-&gt;super, TIMEOUT_SIG, 0U);</code>
+  </operation>
+ </package>
+ <!--${AOs}-->
+ <package name="AOs" stereotype="0x02">
+  <!--${AOs::TimeBomb}-->
+  <class name="TimeBomb" superclass="qpc::QActive">
+   <!--${AOs::TimeBomb::te}-->
+   <attribute name="te" type="QTimeEvt" visibility="0x02" properties="0x00"/>
+   <!--${AOs::TimeBomb::blink_ctr}-->
+   <attribute name="blink_ctr" type="uint32_t" visibility="0x02" properties="0x00"/>
+   <!--${AOs::TimeBomb::ctor}-->
+   <operation name="ctor" type="void" visibility="0x00" properties="0x00">
+    <code>QActive_ctor(&amp;me-&gt;super, (QStateHandler)&amp;TimeBomb_initial);
+QTimeEvt_ctorX(&amp;me-&gt;te, &amp;me-&gt;super, TIMEOUT_SIG, 0U);</code>
+   </operation>
+   <!--${AOs::TimeBomb::SM}-->
+   <statechart properties="0x03">
+    <documentation>Blinky state machine</documentation>
+    <!--${AOs::TimeBomb::SM::initial}-->
+    <initial target="../2/2">
+     <initial_glyph conn="4,2,5,1,30,12,-4">
+      <action box="0,-2,6,2"/>
+     </initial_glyph>
+    </initial>
+    <!--${AOs::TimeBomb::SM::defused}-->
+    <state name="defused">
+     <entry brief="YellowLED-on;">BSP_ledYellowOn();</entry>
+     <exit brief="YellowLED-off;">BSP_ledYellowOff();</exit>
+     <!--${AOs::TimeBomb::SM::defused::BUTTON2_PRESSED}-->
+     <tran trig="BUTTON2_PRESSED" target="../../2">
+      <tran_glyph conn="66,14,2,1,11,-22">
+       <action box="-17,9,16,3"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="46,4,22,10">
+      <entry box="1,2,15,3"/>
+      <exit box="1,5,15,3"/>
+     </state_glyph>
+    </state>
+    <!--${AOs::TimeBomb::SM::armed}-->
+    <state name="armed">
+     <exit brief="allLEDs-off">BSP_ledGreenOff();
+BSP_ledYellowOff();
+BSP_ledOrangeOff();</exit>
+     <!--${AOs::TimeBomb::SM::armed::initial}-->
+     <initial target="../2">
+      <initial_glyph conn="39,11,4,1,7,-9">
+       <action box="0,-2,5,2"/>
+      </initial_glyph>
+     </initial>
+     <!--${AOs::TimeBomb::SM::armed::BUTTON2_PRESSED}-->
+     <tran trig="BUTTON2_PRESSED" target="../../1">
+      <tran_glyph conn="44,20,1,2,18,-6">
+       <action box="0,-2,17,2"/>
+      </tran_glyph>
+     </tran>
+     <!--${AOs::TimeBomb::SM::armed::wait4button}-->
+     <state name="wait4button">
+      <entry brief="GreenLED-on;">BSP_ledGreenOn();</entry>
+      <exit brief="GreenLED-off;">BSP_ledGreenOff();</exit>
+      <!--${AOs::TimeBomb::SM::armed::wait4button::BUTTON_PRESSED}-->
+      <tran trig="BUTTON_PRESSED" target="../../4">
+       <action brief="blink_ctr=5;">me-&gt;blink_ctr = 5U;</action>
+       <tran_glyph conn="3,22,3,1,31,5,-4">
+        <action box="0,-2,25,3"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="3,12,27,12">
+       <entry box="1,2,25,3"/>
+       <exit box="1,5,25,2"/>
+      </state_glyph>
+     </state>
+     <!--${AOs::TimeBomb::SM::armed::pause}-->
+     <state name="pause">
+      <entry brief="arm TE for 0.5s;">QTimeEvt_armX(&amp;me-&gt;te, BSP_TICKS_PER_SEC / 2U, 0U);</entry>
+      <!--${AOs::TimeBomb::SM::armed::pause::TIMEOUT}-->
+      <tran trig="TIMEOUT">
+       <action brief="--blink_ctr;">--me-&gt;blink_ctr;</action>
+       <!--${AOs::TimeBomb::SM::armed::pause::TIMEOUT::[blink_ctr>0]}-->
+       <choice target="../../../4">
+        <guard brief="blink_ctr&gt;0">me-&gt;blink_ctr &gt; 0U</guard>
+        <choice_glyph conn="35,45,4,1,-16,-5">
+         <action box="0,-9,10,2"/>
+        </choice_glyph>
+       </choice>
+       <!--${AOs::TimeBomb::SM::armed::pause::TIMEOUT::[else]}-->
+       <choice target="../../../5">
+        <guard brief="else"/>
+        <choice_glyph conn="35,45,4,1,7,-5">
+         <action box="0,3,10,5"/>
+        </choice_glyph>
+       </choice>
+       <tran_glyph conn="3,45,3,-1,32">
+        <action box="0,-2,22,3"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="3,38,27,10">
+       <entry box="1,2,25,2"/>
+      </state_glyph>
+     </state>
+     <!--${AOs::TimeBomb::SM::armed::blink}-->
+     <state name="blink">
+      <entry brief="OrangeLED-on; arm TE for 0.5s; ">BSP_ledOrangeOn();
+QTimeEvt_armX(&amp;me-&gt;te, BSP_TICKS_PER_SEC / 2U, 0U);</entry>
+      <exit brief="OrangeLED-off;">BSP_ledOrangeOff();</exit>
+      <!--${AOs::TimeBomb::SM::armed::blink::TIMEOUT}-->
+      <tran trig="TIMEOUT" target="../../3">
+       <tran_glyph conn="3,35,3,1,29,5,-2">
+        <action box="0,-2,20,4"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="3,25,27,12">
+       <entry box="1,2,25,3"/>
+       <exit box="1,5,25,3"/>
+      </state_glyph>
+     </state>
+     <!--${AOs::TimeBomb::SM::armed::boom}-->
+     <state name="boom">
+      <entry brief="allLEDs-on">BSP_ledGreenOn();
+BSP_ledYellowOn();
+BSP_ledOrangeOn();</entry>
+      <state_glyph node="3,49,27,8">
+       <entry box="1,2,21,2"/>
+      </state_glyph>
+     </state>
+     <state_glyph node="1,5,43,54">
+      <exit box="1,2,18,2"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="70,63"/>
+   </statechart>
+  </class>
+ </package>
+ <!--${.}-->
+ <directory name=".">
+  <!--${.::main.c}-->
+  <file name="main.c">
+   <text>/* TimeBomb/Button with uC/OS-II RTOS */
+#include &quot;bsp.h&quot;      /* Board Support Package */
+#include &lt;stdbool.h&gt;
+
+Q_DEFINE_THIS_MODULE(&quot;main&quot;) /* this module name for Q_ASSERT() */
+
+/* The TimeBomb AO =============================================================*/
+$declare${AOs::TimeBomb}
+
+$define${AOs::TimeBomb}
+
+static QEvt *timeBomb_queue[10];
+static TimeBomb timeBomb;
+QActive *AO_TimeBomb = &amp;timeBomb.super;
+
+/* the main function =========================================================*/
+int main() {
+    BSP_init(); /* initialize the BSP */
+    QF_init();
+
+    /* create AOs and start it */
+    TimeBomb_ctor(&amp;timeBomb);
+    QACTIVE_START(AO_TimeBomb,
+                  2U,
+                  (const QEvt **)timeBomb_queue,
+                  sizeof(timeBomb_queue)/sizeof(timeBomb_queue[0]),
+                  (void *)0, 0U,
+                  (void *)0);
+
+    QF_run();
+    return 0; /* NOTE: the scheduler does NOT return */
+}
+</text>
+  </file>
+  <!--${.::file1.c}-->
+  <file name="file1.c">
+   <text>$define${AOs::TimeBomb::ctor}</text>
+  </file>
+  <!--${.::file2.c}-->
+  <file name="file2.c">
+   <text>$define${AOs::TimeBomb}</text>
+  </file>
+  <!--${.::file3.c}-->
+  <file name="file3.c">
+   <text>$define1${AOs::TimeBomb::SM::armed}</text>
+  </file>
+ </directory>
+</model>
