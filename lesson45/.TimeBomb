@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <session version="6.1.1">
- <item name="license"></item>
+ <item name="license">GPL</item>
  <group name="locked"/>
  <group name="settings">
   <item name="tabs">1</item>
@@ -9,21 +9,31 @@
   <item name="backups">0</item>
  </group>
  <group name="windows">
-  <item id="AOs::Blinky1::SM">-13,0,640,480</item>
-  <item id="AOs::Blinky2::SM">0,0,675,338,*</item>
+  <item id="AOs::TimeBomb::SM">0,0,675,459,*</item>
+  <item id=".::main.c">0,182,596,300</item>
  </group>
  <group name="search">
   <item name="options">2032128</item>
   <item name="replace">0</item>
  </group>
- <group name="vars"/>
+ <group name="vars">
+  <item id="QPC">C:\qp\qpc</item>
+ </group>
  <group name="tools">
   <group name="tool">
-   <item name="icon">0</item>
-   <item name="title"></item>
-   <item name="command"></item>
+   <item name="icon">2</item>
+   <item name="title">make</item>
+   <item name="command">make</item>
    <item name="args"></item>
-   <item name="dir"></item>
+   <item name="dir">.</item>
+   <item name="options">1</item>
+  </group>
+  <group name="tool">
+   <item name="icon">3</item>
+   <item name="title">clean</item>
+   <item name="command">make</item>
+   <item name="args">clean</item>
+   <item name="dir">.</item>
    <item name="options">0</item>
   </group>
   <group name="tool">
@@ -32,15 +42,7 @@
    <item name="command"></item>
    <item name="args"></item>
    <item name="dir"></item>
-   <item name="options">0</item>
-  </group>
-  <group name="tool">
-   <item name="icon">0</item>
-   <item name="title"></item>
-   <item name="command"></item>
-   <item name="args"></item>
-   <item name="dir"></item>
-   <item name="options">0</item>
+   <item name="options">2</item>
   </group>
   <group name="tool">
    <item name="icon">0</item>
